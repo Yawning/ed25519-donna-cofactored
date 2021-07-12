@@ -113,3 +113,4 @@ typedef struct ge25519_pniels_t {
 	#include "ed25519-donna-impl-base.h"
 #endif
 
+#include "ed25519-donna-cofactored-helpers.h"

@@ -90,12 +90,13 @@ ED25519_FN(ed25519_sign) (const unsigned char *m, size_t mlen, const ed25519_sec
 	contract256_modm(RS + 32, S);
 }
 
+#include "ed25519-donna-batchverify.h"
+
 int
 ED25519_FN(ed25519_sign_open) (const unsigned char *m, size_t mlen, const ed25519_public_key pk, const ed25519_signature RS) {
-	ge25519 ALIGN(16) R, A;
+	ge25519 ALIGN(16) R, Rproj, checkR, A, V;
 	hash_512bits hash;
 	bignum256modm hram, S;
-	unsigned char checkR[32];
 
 	if ((RS[63] & 224) || !ge25519_unpack_negative_vartime(&A, pk))
 		return -1;
@@ -108,14 +109,19 @@ ED25519_FN(ed25519_sign_open) (const unsigned char *m, size_t mlen, const ed2551
 	expand256_modm(S, RS + 32, 32);
 
 	/* SB - H(R,A,m)A */
-	ge25519_double_scalarmult_vartime(&R, &A, hram, S);
-	ge25519_pack(checkR, &R);
+	ge25519_double_scalarmult_vartime(&Rproj, &A, hram, S);
+	ge25519_projected_to_extended(&R, &Rproj);
 
-	/* check that R = SB - H(R,A,m)A */
-	return ed25519_verify(RS, checkR, 32) ? 0 : -1;
+	/* checkR = -R */
+	if (!ge25519_unpack_negative_vartime(&checkR, RS))
+		return -1;
+
+	/* V = -R + (SB - H(R,A,m)A) */
+	ge25519_add(&V, &checkR, &R);
+
+	/* Check that 8V = identity */
+	return ge25519_is_neutral_vartime(&V) ? 0 : -1;
 }
-
-#include "ed25519-donna-batchverify.h"
 
 /*
 	Fast Curve25519 basepoint scalar multiplication

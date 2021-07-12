@@ -64,7 +64,7 @@ const curved25519_key curved25519_expected = {
 	0xd5,0x19,0xb6,0xf1,0xfb,0x96,0xd6,0x04
 };
 
-
+#if defined (ED25519_TEST)
 /* from ed25519-donna-batchverify.h */
 extern unsigned char batch_point_buffer[3][32];
 
@@ -75,6 +75,7 @@ static const unsigned char batch_verify_y[32] = {
 	0x1b,0x95,0xdb,0xbe,0x66,0x59,0x29,0x3b,
 	0x94,0x51,0x2f,0xbc,0x0d,0x66,0xba,0x3f
 };
+#endif
 
 /*
 static const unsigned char batch_verify_y[32] = {
@@ -182,7 +183,9 @@ test_batch(void) {
 
 	/* check the first pass for the expected result */
 	test_batch_instance(batch_no_errors, &dummy_ticks);
-	edassert_equal(batch_verify_y, batch_point_buffer[1], 32, "failed to generate expected result");
+	#if defined(ED25519_TEST)
+		edassert_equal(batch_verify_y, batch_point_buffer[1], 32, "failed to generate expected result");
+	#endif
 
 	/* make sure ge25519_multi_scalarmult_vartime throws an error on the entire batch with wrong data */
 	for (i = 0; i < 4; i++) {
