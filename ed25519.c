@@ -100,6 +100,8 @@ ED25519_FN(ed25519_sign_open) (const unsigned char *m, size_t mlen, const ed2551
 
 	if ((RS[63] & 224) || !ge25519_unpack_negative_vartime(&A, pk))
 		return -1;
+	if (!scalar_is_canonical_vartime(RS+32))
+		return -1;
 
 	/* hram = H(R,A,m) */
 	ed25519_hram(hash, RS, pk, m, mlen);

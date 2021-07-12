@@ -235,6 +235,8 @@ ED25519_FN(ed25519_sign_open_batch) (const unsigned char **m, size_t *mlen, cons
 
 		/* compute scalars[0] = ((r1s1 + r2s2 + ...)) */
 		for (i = 0; i < batchsize; i++) {
+			if (!scalar_is_canonical_vartime(RS[i] + 32))
+				goto fallback;
 			expand256_modm(batch.scalars[i], RS[i] + 32, 32);
 			mul256_modm(batch.scalars[i], batch.scalars[i], r_scalars[i]);
 		}

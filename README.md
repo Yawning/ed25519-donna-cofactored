@@ -15,6 +15,12 @@ Fixes:
    that others will reject.  Note that non-cofactored batch verification
    is basically unsafe/unusable.
 
+ * Verification now enforces S < L as mandated by RFC 8032 and FIPS 186-5.
+   While the original ed25519 paper explicitly notes that signature
+   malleability is out-of-scope, and as a consequence older implementations
+   tend not to enforce this constraint, more modern definitions require
+   it.
+
 Out of scope:
 
  * Providing different behavior to upstream when verifying signatures
@@ -29,9 +35,8 @@ Out of scope:
 |Library        | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10| 11|
 |---------------+---+---+---+---+---+---+---+---+---+---+---+---|
 |upstream       | V | V | V | V | X | X | V | X | X | X | X | V |
-|cofactored     | V | V | V | V | V | V | V | X | X | V | V | V |
+|cofactored     | V | V | V | V | V | V | X | X | X | V | V | V |
  ---------------------------------------------------------------
-
 ```
 
 ### License

@@ -50,3 +50,24 @@ ge25519_projected_to_extended(ge25519 *r, const ge25519 *p) {
 	curve25519_mul(r->y, p->y, p->z);
 	curve25519_square(r->z, p->z);
 }
+
+static const uint64_t curve_order[4] = {
+    0x5812631a5cf5d3ed, 0x14def9dea2f79cd6, 0, 0x1000000000000000
+};
+
+static int scalar_is_canonical_vartime(const unsigned char *p) {
+    int i;
+
+    for (i = 3; ; i--) {
+        uint64_t v = U8TO64_LE(p+(i*8));
+        if (v > curve_order[i]) {
+            return 0;
+        } else if (v < curve_order[i]) {
+            break;
+        } else if (i == 0) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
